@@ -1,4 +1,6 @@
 import customtkinter as ctk
+from tkinter import filedialog  # Thư viện để mở hộp thoại chọn file
+from ui.canvas_handler import ImageCanvas 
 
 # cấu hình giao diện (sáng/tối)
 ctk.set_appearance_mode("System")
@@ -30,11 +32,19 @@ class App(ctk.CTk):
         # phần hiển thị bên phải (canvas)
         self.canvas_frame = ctk.CTkFrame(self)
         self.canvas_frame.grid(row=0, column=1, sticky="nswe")
-        self.status_label = ctk.CTkLabel(self.canvas_frame, text="Ảnh sẽ được hiển thị ở đây")
-        self.status_label.pack(expand=True)
+        
+        # khởi tạo Canvas từ file canvas_handler.py
+        self.image_canvas = ImageCanvas(self.canvas_frame)
+        self.image_canvas.pack(fill="both", expand=True)
     
     def select_image(self):
-        print("Đã nhấn nút chọn ảnh") #hàm xử lý chọn ảnh
+        file_path = filedialog.askopenfilename(
+            filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.bmp;*.gif")]
+        )
+
+        if file_path:
+            print(f"Đã chọn ảnh: {file_path}")
+            self.image_canvas.load_image(file_path)
 
 # chạy ứng dụng
 if __name__ == "__main__":

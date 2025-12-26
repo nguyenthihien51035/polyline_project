@@ -28,7 +28,25 @@ class App(ctk.CTk):
         # nút chọn ảnh
         self.btn_select_image = ctk.CTkButton(self.sidebar, text="Chọn ảnh bản vẽ", command=self.select_image)
         self.btn_select_image.grid(row=1, column=0, padx=20, pady=10)
-    
+
+        # điều khiển layer
+        self.layer_label = ctk.CTkLabel(self.sidebar, text="Các lớp hiển thị", 
+                                        font=ctk.CTkFont(size=14, weight="bold"))
+        self.layer_label.grid(row=2, column=0, padx=20, pady=(20,10))
+
+        self.sw_original = ctk.CTkSwitch(self.sidebar, text="Ảnh gốc")
+        self.sw_original.select() # mặc định bật
+        self.sw_original.grid(row=3, column=0, padx=20, pady=10, sticky="w")
+
+        self.sw_processed = ctk.CTkSwitch(self.sidebar, text="Ảnh đã xử lý")
+        self.sw_processed.grid(row=4, column=0, padx=20, pady=10, sticky="w")
+
+        self.sw_raw = ctk.CTkSwitch(self.sidebar, text="Dữ liệu thô")
+        self.sw_raw.grid(row=5, column=0, padx=20, pady=10, sticky="w")
+
+        self.sw_final = ctk.CTkSwitch(self.sidebar, text="Dữ liệu cuối cùng")
+        self.sw_final.grid(row=6, column=0, padx=20, pady=10, sticky="w")
+
         # phần hiển thị bên phải (canvas)
         self.canvas_frame = ctk.CTkFrame(self)
         self.canvas_frame.grid(row=0, column=1, sticky="nswe")

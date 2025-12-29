@@ -10,6 +10,13 @@ class ImageCanvas(tk.Canvas):
         self.display_image = None # lưu ảnh hiển thị trên canvas
         self.image_id = None # id của ảnh trên canvas
 
+        self.layers_data = {
+            "raw_layer": {"data": [], "color": "red", "visible": True},
+            "final_layer": {"data": [], "color": "green", "visible": True}
+        }
+
+        self.polylines = []
+
         # các biến để sử lý zoom và pan
         self.scale = 1.0
         self.pan_start_x = 0
@@ -54,6 +61,44 @@ class ImageCanvas(tk.Canvas):
         # cập nhật vùng cuộn của canvas theo kích thước ảnh
         self.config(scrollregion=self.bbox("all"))
 
+        # Vẽ lại tất cả các lớp đang có
+        for tag, info in self.layers_data.items():
+            if info["visible"]:
+                self._draw_specific_layer(tag)
+
+    def update_layer_data(self, tag, polylines, color=None):
+        """Cập nhật dữ liệu cho một lớp cụ thể"""
+        if tag in self.layers_data:
+            self.layers_data[tag]["data"] = polylines
+            if color:
+                self.layers_data[tag]["color"] = color
+            self._draw_specific_layer(tag)
+
+    def _draw_specific_layer(self, tag):
+        """Hàm nội bộ để vẽ một lớp dựa trên tag"""
+        self.delete(tag) # Xóa nét vẽ cũ của tag này
+        info = self.layers_data[tag]
+        if not info["data"] or not info["visible"]:
+            return
+
+        for line in info["data"]:
+            scaled_points = []
+            for (x, y) in line:
+                scaled_points.append(x * self.scale)
+                scaled_points.append(y * self.scale)
+            
+            if len(scaled_points) >= 4:
+                self.create_line(scaled_points, fill=info["color"], width=2, tags=tag)
+
+    def toggle_layer_visibility(self, tag, is_visible):
+        """Ẩn hoặc hiện một lớp"""
+        if tag in self.layers_data:
+            self.layers_data[tag]["visible"] = is_visible
+            if is_visible:
+                self._draw_specific_layer(tag)
+            else:
+                self.delete(tag)
+
     def view_init(self):
         """Đưa ảnh về vị trí ban đầu"""
         self.xview_moveto(0)
@@ -78,3 +123,20 @@ class ImageCanvas(tk.Canvas):
         self.scale = max(0.1, min(self.scale, 10.0))
         
         self.render()
+
+    def raw_polylines(self, polylines, color="red", tag="polyline"):
+        """vẽ các đường  polyline lên canvas dựa trên tỉ lệ scale hiện tại"""
+        self.polylines = polylines
+        self.delete(tag)
+        if not polylines: return
+
+        for line in polylines:
+            # tinh lai toa do dua tren ti le zoom
+            scaled_points = []
+            for(x, y) in line:
+                scaled_points.append(x * self.scale)
+                scaled_points.append(y * self.scale)
+
+            # ve duong noi cac diem
+            if len(scaled_points) >= 4:
+                self.create_line(scaled_points, fill=color, width=2, tags=tag)
